@@ -1,4 +1,31 @@
-import { useState } from 'react'
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
+import Home from '../pages/Home'
+import Products from '../pages/Products'
+import Categories from '../pages/Categories'
+import History from '../pages/History'
+import NavBar from '../components/layout/NavBar'
+
+function App() {
+
+  return(
+    <>
+    <Router>
+      <NavBar />
+      <Routes>
+        <Route exact path="/" element = {<Home />} />
+        <Route path="/products" element = {<Products/>} />
+        <Route path="/categories" element ={<Categories/>} />
+        <Route path="/history" element = {<History/>} />
+      </Routes>
+    </Router>
+    
+    </>
+  )
+}
+
+export default App
+
+/*import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -33,3 +60,5 @@ function App() {
 }
 
 export default App
+
+*/
