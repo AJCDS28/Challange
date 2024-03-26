@@ -57,3 +57,50 @@ article .table_category {
     line-height: 2;
 }
 
+thead tr th {
+    border-bottom: 1px solid rgb(163, 163, 163);
+    border-right: 1px solid rgb(163, 163, 163);
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+thead tr th:nth-child(1) {
+    width: 10%;
+}
+
+thead tr th:nth-child(2) {
+    width: 25%;
+}
+
+thead tr th:nth-child(n+3) {
+    width: 10%;
+}
+
+thead tr th:last-child {
+    border-right: none;
+}
+
+tbody tr td {
+    border-right: 1px solid rgb(163, 163, 163);
+    border-bottom: 1px solid rgb(163, 163, 163);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+tbody td button {
+    border: none;
+    color: black;
+    background-color: white;
+    font-weight: 800;
+    color: rgb(167, 62, 62);
+    font-size: 1em;
+}
+
+tbody td button:hover {
+    font-size: 1.2em;
+    color: rgb(255, 0, 0);
+    cursor: pointer;
+}

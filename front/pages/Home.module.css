@@ -88,3 +88,72 @@
 .table_products thead tr th:last-child {
     border-right: none;
 }
+
+.button_delete {
+    background-color: white;
+    border: none;
+    color: rgb(167, 62, 62);
+    font-size: 1em;
+}
+
+.button_delete:hover {
+    color: red;
+    font-size: 1.5em;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.buttons_bottom {
+    display: block;
+    margin-top: 5%;
+    text-align: right;
+    font-size: 1.3em;
+}
+
+.buttons_bottom p {
+    display: inline;
+    position: relative;
+    right: 15%;
+    font-size: 0.8em;
+}
+
+.buttons_bottom div {
+    width: auto;
+}
+
+.buttons_bottom button {
+    display: inline;
+    width: 30%;
+    margin: 5% 1% 0 0;
+    font-weight: 700;
+    border: 1px solid grey;
+    border-radius: 7px;
+}
+
+.buttons_bottom button:hover {
+    color: red;
+    cursor: pointer;
+    font-size: 0.7em;
+}
+
+section.buttonsDiv {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    font-size: 0.9em;
+    font-weight: 700;
+}
+
+div.buttonsDiv:first-child {
+    width: 30%;
+    position: relative;
+    left: 62%;
+    word-break: keep-all;
+}
+
+div.buttonsDiv:nth-child(2) {
+    width: 30%;
+    position: relative;
+    word-break: keep-all;
+}
