@@ -14,7 +14,7 @@ $myPDO = $dbConnector->connect();
 $categories = new Categories($myPDO);
 
 switch ($action) {
-    case 'form':
+    case 'addCategory':
         $name = $_POST['categoryName'];
         $tax = $_POST['taxCategory'];
         $categories->addCategory($name, $tax);
@@ -23,13 +23,10 @@ switch ($action) {
         $result = $categories->getAllCategories();
         echo json_encode($result);
         break;
-    case 'deleteCategory':
+    case 'delete':
         $code = $_POST['code'];
         $resul =  $categories->deleteCategory($code);
         echo json_encode($resul);
-        /*if($resul[1]==7){
-            return echo "Não foi possivel excluir a categoria, há produtos cadastrados com ela";
-        }*/
         break;
     default:
         echo json_encode(['error' => 'Ação desconhecida']);

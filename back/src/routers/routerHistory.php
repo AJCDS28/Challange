@@ -22,22 +22,7 @@ switch ($action) {
         $code = $_POST['code'];
         $result = $orders->readHistoryItens($code);
         echo json_encode($result);
-        break;
-    /*case 'updateProductCar':
-        $name = $_POST['Products'];
-        $amount = $_POST['amountProduct'];
-        $productsCar->updateProductCar($name, $amount);
-        break;
-    case 'deleteProductCar':
-        $code = $_POST['code'];
-        $productsCar->deleteProductCar($code);
-        echo json_encode($code);
         break; 
-    case 'finishBuy':
-        $result = $productsCar->getAllProducts();
-        $productsCar->finishBuy($result);
-        echo json_encode($productsCar);
-        break; */  
     default:
         echo json_encode(['error' => 'Ação desconhecida']);
         break;

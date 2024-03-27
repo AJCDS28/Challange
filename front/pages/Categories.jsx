@@ -1,11 +1,14 @@
 import styles from '../pages/Categories.module.css'
 import Table from '../components/layout/DynamicTable'
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react'
+import DynamicForm from '../components/layout/DynamicForm'
+import DeleteButton from '../components/layout/DelectButton'
 
 const Categories = () => {
     const [categories, setCategories] = useState([]);
     const [categoryName, setCategoryName] = useState('');
     const [tax, setTax] = useState('');
+    const url = 'http://localhost:80/routers/routerCategories.php'
 
     const handleDelete = async (e) => {
         e.preventDefault();
@@ -15,7 +18,7 @@ const Categories = () => {
                 formData.append('action', 'deleteCategory');
                 formData.append('code', e.target.value);
                 try {
-                const deleteResponse = await fetch('http://localhost:80/routers/routerCategories.php',{
+                const deleteResponse = await fetch(url,{
                     method: 'POST',
                     body: formData
                 });
@@ -33,7 +36,7 @@ const Categories = () => {
 
     };
     const fetchData = async () => {
-        const response = await fetch('http://localhost:80/routers/routerCategories.php');
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Erro ao ler dados do servidor');
         }
@@ -57,58 +60,49 @@ const Categories = () => {
             code: categories[index].code,
             name: categories[index].name,
             tax: categories[index].tax,
-            delete: <button onClick={handleDelete} value={categories[index].code}>X</button>
+            delete: <DeleteButton url={url} code={categories[index].code} />
         }
     }
     
-    const handleFormSubmit = async (event) => {
-        event.preventDefault();
-        const data = {
-            categoryName,
-            tax
-        }
-        console.log(data);
-        const formData = new FormData();
-        formData.append('categoryName', data.categoryName);
-        formData.append('taxCategory', data.tax);
-        formData.append('action', 'addCategory');
+    const handleFormSubmit = async (formData) => {
+        console.log(formData)
+        const dataForm = new FormData();
+        dataForm.append('action', formData.action);
+        dataForm.append('categoryName', formData.categoryName);
+        dataForm.append('taxCategory', formData.tax);
 
-        const response = await fetch('http://localhost:80/routers/routerCategories.php', {
-            method: 'POST',
-            mode: 'cors',
-            body: formData
-        });
-        if (response.ok) {
-            setCategoryName('');
-            setTax('');
-            alert('Produto inserido no carrinho com sucesso!');
-            fetchData();
-        } else {
-            alert('Erro ao adicionar produto ao carrinho.');
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                mode: 'cors',
+                body: dataForm
+            });
+            if (response.ok) {
+                setCategoryName('');
+                setTax('');
+                alert('Categoria adicionada com sucesso!');
+                fetchData();
+            } else {
+                throw new Error('Erro ao adicionar categoria');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao adicionar categoria');
         }
     };
 
     return (
         <main className={styles.main}>
             <article className={styles.menu_add_category}>
-                <form id="form" onSubmit={handleFormSubmit} >
-                    <span>
-                        <input
-                            type="text"
-                            value={categoryName}
-                            onChange={(e) => setCategoryName(e.target.value)}
-                            placeholder="Category name"
-                            required />
-                        <input type="number"
-                            value={tax}
-                            onChange={(e) => setTax(e.target.value)}
-                            placeholder="Tax"
-                            step="0.01"
-                            min="0.01"
-                            required />
-                    </span>
-                    <button className={styles.button_add_caterory} type="submit">Add Category</button>
-                </form>
+            <DynamicForm
+                    fields={[
+                        { type: 'text', name: 'categoryName', placeholder: 'Category name', required: true },
+                        { type: 'number', name: 'tax', placeholder: 'Tax', step: '0.01', min: '0.01', required: true }
+                    ]}
+                    onSubmit={handleFormSubmit}
+                    action={'action'}
+                    options={'addCategory'}
+                />
 
             </article>
 

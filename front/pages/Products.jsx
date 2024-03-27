@@ -1,6 +1,7 @@
 import Table from '../components/layout/DynamicTable'
 import React, { useState, useEffect } from 'react'
 import styles from '../pages/Products.module.css'
+import DynamicForm from '../components/layout/DynamicForm'
 
 function Products() {
     const columns = [
@@ -19,11 +20,7 @@ function Products() {
     const [amount, setAmount] = useState('');
     const [unitPrice, setUnitPrice] = useState('');
 
-    const handleProductChange = (event) => {
-        const selectedIndex = event.target.value;
-        console.log(selectedIndex);
-        setSelectedCategory(selectedIndex);
-    };
+
     const fetchDataCategories = async () => {
         const response = await fetch('http://localhost:80/routers/routerCategories.php');
         if (!response.ok) {
@@ -45,16 +42,16 @@ function Products() {
         const data = await response.json();
         setProducts(data);
     }
- 
+
     const handleDelete = async (e) => {
         e.preventDefault();
         const response = confirm(`Deseja excluir mesmo o produto ${e.target.value}?`);
         if (response) {
-                const formData = new FormData();
-                formData.append('action', 'deleteProduct');
-                formData.append('code', e.target.value);
-                try {
-                const deleteResponse = await fetch('http://localhost:80/routers/routerProducts.php',{
+            const formData = new FormData();
+            formData.append('action', 'deleteProduct');
+            formData.append('code', e.target.value);
+            try {
+                const deleteResponse = await fetch('http://localhost:80/routers/routerProducts.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -83,84 +80,81 @@ function Products() {
         }
     }
 
-    const handleFormSubmit = async (event) => {
-        event.preventDefault();
-        const data = {
-            productName,
-            amount, 
-            unitPrice,
-            selectedCategory
-        }
-        console.log(data);
-        const formData = new FormData();
-        formData.append('productName', data.productName);
-        formData.append('amountProduct', data.amount);
-        formData.append('unitPrice', data.unitPrice);
-        formData.append('Categoria', data.selectedCategory);
-        formData.append('action', 'insertProducts');
+    const handleFormSubmit = async (formData) => {
+        const dataForm = new FormData();
+        console.log(formData.productName)
+        const name = formData.productName
+        setProductName(formData.productName)
+        console.log(productName)
+        dataForm.append('productName', formData.productName);
+        dataForm.append('amountProduct', formData.amount);
+        dataForm.append('unitPrice', formData.unitPrice);
+        dataForm.append('Categoria', formData.Categories);
 
-        const response = await fetch('http://localhost:80/routers/routerProducts.php', {
-            method: 'POST',
-            mode: 'cors',
-            body: formData
-        });
-        if (response.ok) {
-            setProductName('');
-            setAmount('');
-            setUnitPrice('');
-            setSelectedCategory('');
-            alert('Produto inserido no carrinho com sucesso!');
-            fetchDataProducts();
+        if (await isNewProduct()) {
+            dataForm.append('action', formData.action);
+            const response = await fetch('http://localhost:80/routers/routerProducts.php', {
+                method: 'POST',
+                mode: 'cors',
+                body: dataForm
+            });
+            
+            if (response.ok) {
+                alert('Produto inserido no carrinho com sucesso!');
+                fetchDataProducts();
+            }
         } else {
-            alert('Erro ao adicionar produto ao carrinho.');
+            const update = confirm("Produto já cadastrado, deseja atualiza-lo?");
+            if (update) {
+                dataForm.append('action', 'updateProduct');
+
+                const response = await fetch('http://localhost:80/routers/routerProducts.php', {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: dataForm
+                })
+
+                if (response.ok) {
+                    alert('Produto atualizado com sucesso!');
+                    fetchDataProducts();
+                } else {
+                    throw new Error('Erro ao atualizar produto');
+                }
+            }
         }
     };
-
+    async function isNewProduct() {
+        const datas = products;
+        console.log(productName);
+        if (datas.length > 0) {
+            for (let i = 0; i < datas.length; i++) {
+                if (productName == datas[i]['product_name']) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     return (
         <>
             <main className={styles.main}>
                 <article className={styles.menu_add_product}>
-                    <form id="form" onSubmit={handleFormSubmit}>
-                        <input
-                            type="text"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
-                            placeholder="Product Name"
-                            required />
-                        <span>
-                            <input 
-                            type="number" 
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            step="0" min="1" 
-                            placeholder="Amount"
-                            required 
-                            pattern="[0-9]+$"/>
-
-                            <input 
-                            type="number"
-                            value={unitPrice}
-                            onChange={(e) => setUnitPrice(e.target.value)} 
-                            step="0.01" min="0.01"
-                            placeholder="Unit price"
-                            required />
-
-                            <select name="Categories" value={selectedCategory} onChange={handleProductChange} required>
-                                <option value="">Select Category</option>
-                                {categories.map((category) => (
-                                    <option key={category.code} value={category.code}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </span>
-                        <button className={styles.button_add_product} type="submit">Add Product</button>
-                    </form>
+                    <DynamicForm
+                        fields={[
+                            { type: 'text', name: 'productName', placeholder: 'Product Name', required: true },
+                            { type: 'number', name: 'amount', placeholder: 'Amount', step: '0', min: '1', required: true },
+                            { type: 'number', name: 'unitPrice', placeholder: 'Unit price', step: '0.01', min: '0.01', required: true },
+                            { type: 'select', name: 'Categories', placeholder: 'Select Category', required: true, options: categories.map(category => ({ value: category.code, label: category.name })) }
+                        ]}
+                        onSubmit={handleFormSubmit}
+                        action={'action'}
+                        options={'insertProducts'}
+                    />
                 </article>
 
 
                 <article>
-                   {<Table columns={columns} data={data}/>}
+                    {<Table columns={columns} data={data} />}
                 </article>
             </main>
         </>

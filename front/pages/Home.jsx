@@ -2,6 +2,8 @@
 import styles from './Home.module.css'
 import DynamicTable from '../components/layout/DynamicTable'
 import { useState, useEffect } from 'react'
+import DynamicForm from '../components/layout/DynamicForm'
+//import styles from '../components/layout/DynamicForm.module.css'
 
 function Home() {
     const [productsCar, setProductsCar] = useState([])
@@ -11,6 +13,8 @@ function Home() {
     const [amount, setAmount] = useState('');
     const [tax, setTax] = useState('');
     const [unitPrice, setUnitPrice] = useState('');
+    const [totalTax, setTotalTax] = useState('');
+    const [totalBuy, setTotalBuy] = useState('');
 
     const columns = [
         { id: 1, name: 'Product' },
@@ -74,6 +78,7 @@ function Home() {
     useEffect(() => {
         fetchDataProducts();
         fetchDataProductsCar();
+
     }, []);
 
     async function fetchDataProducts() {
@@ -91,27 +96,34 @@ function Home() {
         }
         const data = await response.json();
         setProductsCar(data);
+
     }
-    const handleFormSubmit = async (event) => {
-        event.preventDefault();
-        const datas = {
-            selectedProduct,
-            amount,
-            unitPrice,
-            tax
+    var valueTax = 0, total = 0;
+    function sumValues() {
+
+        for (let index = 0; index < productsCar.length; index++) {
+            valueTax += parseFloat(productsCar[index].tax);
+            total += parseFloat(productsCar[index].price * productsCar[index].amount);
         }
-        const formData = new FormData();
-        formData.append('Products', productName);
-        formData.append('code_product', parseInt(datas.selectedProduct));
-        formData.append('amountProduct', parseInt(datas.amount));
-        formData.append('priceProduct', parseFloat(datas.unitPrice));
-        formData.append('taxProduct', parseFloat(datas.tax));
-        formData.append('action', 'addProductCar');
+        setTotalTax(valueTax);
+        setTotalBuy(total);
+
+    }
+
+    const handleHomeFormSubmit = async (formData) => {
+        const dataFom = new FormData();
+        dataFom.append('Products', productName);
+        dataFom.append('code_product', parseInt(formData.selectedProduct));
+        dataFom.append('amountProduct', parseInt(formData.amount));
+        dataFom.append('priceProduct', parseFloat(formData.unitPrice));
+        dataFom.append('taxProduct', parseFloat(formData.tax));
+        dataFom.append('action', formData.action);
+        console.log(formData)
 
         const response = await fetch('http://localhost:80/routers/routerHome.php', {
             method: 'POST',
             mode: 'cors',
-            body: formData
+            body: dataFom
         });
         console.log(response);
         if (response.ok) {
@@ -178,7 +190,7 @@ function Home() {
                 arrayProductsCar.push(product);
 
             }
-            if(verifyBuy){
+            if (verifyBuy) {
                 const dataForm = new FormData();
                 dataForm.append('action', 'finishBuy');
                 const data = await fetch('http://localhost:80/routers/routerHome.php', {
@@ -188,125 +200,100 @@ function Home() {
                 })
                 const datas = await data.json();
                 if (data.ok) {
-                        for (let index = 0; index < arrayProductsCar.length; index++) {
-                            await deleteProductCar(arrayProductsCar[index].code);
+
+                    for (let index = 0; index < arrayProductsCar.length; index++) {
+                        await deleteProductCar(arrayProductsCar[index].code);
                     }
                 }
             }
         }
-
-        }
-        async function updateStock(code_product, newAmount) {
-            alert(code_product);
-            const productToUpdate = productsCar.find(product => product.product_code === code_product);
-            console.log(productToUpdate['name_product']);
-            try{
-                if (productToUpdate) {
-                    for (let index = 0; index < products.length; index++) {
-                        if (productToUpdate['name_product'] == products[index]['product_name']) {
-                            var amount = products[index]['amount'];
-                        }
-                    }
-                    const currentAmount = parseInt(amount);
-                    const newAmounts = parseInt(newAmount);
-                    const updateAmount = currentAmount - newAmounts;
-                    if(updateAmount >= 0){
-                        const formData = new FormData();
-                        formData.append('code_product', code_product);
-                        formData.append('newAmount', updateAmount);
-                        formData.append('action', 'updateStock');
-                        const response = await fetch('http://localhost:80/routers/routerProducts.php', {
-                            method: 'POST',
-                            mode: 'cors',
-                            body: formData
-                        });
-                        const data = await response.json();
-                        console.log(data);
-                        if (!response.ok) {
-                            console.error('Erro ao atualizar o estoque do produto.');
-                        }
-                        return true;
-                    }else{
-                        alert("Produto "+ productToUpdate.name_product+" indisponivel no estoque");
-                        return false;
-                    }
-                    
-                } else {
-                    console.error('Produto não encontrado.');
-                    return false;
-                }
-            }catch(error){
-                console.log(error);
-                return false;
-            }
-        }
-
-        return (
-            <>
-                <main className={styles.main}>
-                    <article className={styles.menu_product}>
-                        <form id="form" onSubmit={handleFormSubmit}>
-                            <select name="Products" value={selectedProduct} className={styles.option} onChange={handleProductChange} required>
-                                <option value="" >Select Product</option>
-                                {products.map((product) => (
-                                    <option key={product.code_product} value={product.code_product}>
-                                        {product.product_name}
-                                    </option>
-                                ))}
-                            </select>
-                            <span className={styles.span}>
-                                <input
-                                    type="number"
-                                    name="amountProduct"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    step="0" min="1"
-                                    className="options"
-                                    placeholder="Amount"
-                                    required />
-                                <input
-                                    type="text"
-                                    value={tax}
-                                    name="taxProduct"
-                                    className="options"
-                                    placeholder=" Tax"
-                                    readOnly
-                                    required />
-                                <input
-                                    type="text"
-                                    value={unitPrice}
-                                    name="priceProduct"
-                                    className="options"
-                                    placeholder=" Price"
-                                    readOnly
-                                    required />
-                            </span>
-                            <button className={styles.button_add} type="submit">AddProduct</button>
-                        </form>
-                    </article>
-
-                    <article className={styles.menu_buy}>
-
-                        <DynamicTable columns={columns} data={data} />
-
-                        <article className={styles.buttons_bottom}>
-                            <section className={styles.buttonsDiv">
-                                <div className="buttonTax">
-                                    <p className="tax"></p>
-                                </div>
-                                <div className="buttonTotal">
-                                    <p className="total"></p>
-                                </div>
-                            </section>
-                            <button id="buttonCancel" className="buttonCancel" onClick={handleCancelBuy}>Cancel</button>
-                            <button id="buttonFinish" className="buttonFinish" onClick={handleFinishBuy}>Finish</button>
-                        </article>
-                    </article>
-                </main>
-            </>
-
-        )
 
     }
+    async function updateStock(code_product, newAmount) {
+        alert(code_product);
+        const productToUpdate = productsCar.find(product => product.product_code === code_product);
+        console.log(productToUpdate['name_product']);
+        try {
+            if (productToUpdate) {
+                for (let index = 0; index < products.length; index++) {
+                    if (productToUpdate['name_product'] == products[index]['product_name']) {
+                        var amount = products[index]['amount'];
+                    }
+                }
+                const currentAmount = parseInt(amount);
+                const newAmounts = parseInt(newAmount);
+                const updateAmount = currentAmount - newAmounts;
+                if (updateAmount >= 0) {
+                    const formData = new FormData();
+                    formData.append('code_product', code_product);
+                    formData.append('newAmount', updateAmount);
+                    formData.append('action', 'updateStock');
+                    const response = await fetch('http://localhost:80/routers/routerProducts.php', {
+                        method: 'POST',
+                        mode: 'cors',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    console.log(data);
+                    if (!response.ok) {
+                        console.error('Erro ao atualizar o estoque do produto.');
+                    }
+                    return true;
+                } else {
+                    alert("Produto " + productToUpdate.name_product + " indisponivel no estoque");
+                    return false;
+                }
 
-    export default Home;
+            } else {
+                console.error('Produto não encontrado.');
+                return false;
+            }
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    return (
+        <>
+            <main className={styles.main}>
+                <article className={styles.menu_product}>
+                    <DynamicForm
+                        fields={[
+                            { type: 'select', name: 'Products', placeholder: 'Select Product', required: true, options: products.map(product => ({ value: product.code_product, label: product.product_name })) },
+                            { type: 'number', name: 'amountProduct', placeholder: 'Amount', step: '0', min: '1', required: true },
+                            { type: 'text', name: 'taxProduct', placeholder: 'Tax', readOnly: true, required: true },
+                            { type: 'text', name: 'priceProduct', placeholder: 'Price', readOnly: true, required: true }
+                        ]}
+                        onSubmit={handleHomeFormSubmit}
+                        action={'action'}
+                        options={'addProductCar'}
+                    />
+
+                </article>
+
+                <article className={styles.menu_buy}>
+
+                    <DynamicTable columns={columns} data={data} />
+
+                    <article className={styles.buttons_bottom}>
+                        <section className={styles.buttonsDiv}>
+                            <div className={styles.buttonTax}>
+                                <p >Tax: {totalTax}</p>
+                            </div>
+                            <div>
+                                <p >Total: {totalBuy}</p>
+                            </div>
+                        </section>
+                        <button id="buttonCancel" className={styles.buttonCancel} onClick={handleCancelBuy}>Cancel</button>
+                        <button id="buttonFinish" className={styles.buttonFinish} onClick={handleFinishBuy}>Finish</button>
+                    </article>
+                </article>
+            </main>
+        </>
+
+    )
+
+}
+
+export default Home;
