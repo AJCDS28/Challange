@@ -4,9 +4,14 @@ import React, { useState } from 'react';
 const DynamicForm = ({ fields, onSubmit,action, options }) => {
     const [formData, setFormData] = useState({});
 
-    const handleChange = (e, name) => {
+    /*const handleChange = (e, name) => {
         setFormData({ ...formData, [name]: e.target.value, [action]: options,});
         
+    };*/
+    const handleChange = (e, name) => {
+        const value = e.target.value;
+        const selectedProduct = options.find(option => option.value === value);
+        setFormData({ ...formData, [name]: value, taxProduct: selectedProduct.tax, priceProduct: selectedProduct.price, [action]: options,});
     };
 
     const handleSubmit = (e) => {

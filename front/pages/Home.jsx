@@ -78,8 +78,10 @@ function Home() {
     useEffect(() => {
         fetchDataProducts();
         fetchDataProductsCar();
-
     }, []);
+    useEffect(() => {
+        sumValues();
+    }, [productsCar]);
 
     async function fetchDataProducts() {
         const response = await fetch('http://localhost:80/routers/routerProducts.php');
@@ -98,17 +100,22 @@ function Home() {
         setProductsCar(data);
 
     }
-    var valueTax = 0, total = 0;
-    function sumValues() {
 
-        for (let index = 0; index < productsCar.length; index++) {
-            valueTax += parseFloat(productsCar[index].tax);
-            total += parseFloat(productsCar[index].price * productsCar[index].amount);
+    const sumValues = () => {
+        let taxSum = 0;
+        let totalSum = 0;
+        for (const product of productsCar) {
+            const amount = parseInt(product.amount);
+            const price = parseFloat(product.price);
+            const tax = parseFloat(product.tax);
+            const total = amount * price;
+            taxSum += tax;
+            totalSum += total;
         }
-        setTotalTax(valueTax);
-        setTotalBuy(total);
+        setTotalTax(taxSum);
+        setTotalBuy(totalSum);
+    };
 
-    }
 
     const handleHomeFormSubmit = async (formData) => {
         const dataFom = new FormData();
@@ -268,6 +275,7 @@ function Home() {
                         onSubmit={handleHomeFormSubmit}
                         action={'action'}
                         options={'addProductCar'}
+                        onChange={handleProductChange}
                     />
 
                 </article>

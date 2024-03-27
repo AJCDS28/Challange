@@ -4,16 +4,15 @@ import React from 'react';
 const DynamicTable = ({ columns, data }) => {
   
 
-  const Row = ({record}) => {
-    const keys = Object.keys(record)
+  const Row = ({ record, index }) => {
+    const values = Object.values(record);
     return (
-    <tr key={record.code}>
-      {
-        keys.map(key => <td key={key}>{record[key]}</td>)
-      }
-    </tr>
-    )
-  }
+      <tr key={index}>
+        {values.map((value, idx) => <td key={idx}>{value}</td>)}
+      </tr>
+    );
+  };
+
   return (
     
     <table>
@@ -29,7 +28,7 @@ const DynamicTable = ({ columns, data }) => {
       </thead>
       <tbody>  
         
-        {data.map(record => <Row record={record} />)}
+      {data.map((record, index) => <Row key={index} index={index} record={record} />)}
         
       </tbody>
     </table>

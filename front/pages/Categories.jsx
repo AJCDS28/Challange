@@ -9,7 +9,7 @@ const Categories = () => {
     const [categoryName, setCategoryName] = useState('');
     const [tax, setTax] = useState('');
     const url = 'http://localhost:80/routers/routerCategories.php'
-
+/*
     const handleDelete = async (e) => {
         e.preventDefault();
         const response = confirm(`Deseja excluir mesmo a categoria ${e.target.value}?`);
@@ -35,6 +35,11 @@ const Categories = () => {
         }
 
     };
+    */
+
+    const handleDeleteSuccess = () => {
+        fetchData(); 
+    };
     const fetchData = async () => {
         const response = await fetch(url);
         if (!response.ok) {
@@ -54,15 +59,13 @@ const Categories = () => {
         { id: 4, name: 'Delete' }
     ]
 
-    const data = [];
-    for (let index = 0; index < categories.length; index++) {
-        data[index] = {
-            code: categories[index].code,
-            name: categories[index].name,
-            tax: categories[index].tax,
-            delete: <DeleteButton url={url} code={categories[index].code} />
-        }
-    }
+    const data = categories.map(category => ({
+        code: category.code,
+        name: category.name,
+        tax: category.tax,
+        delete: <DeleteButton url={url} code={categories.code} action="deleteCategory" id={category.code} onSuccess={handleDeleteSuccess} />
+
+    }))
     
     const handleFormSubmit = async (formData) => {
         console.log(formData)

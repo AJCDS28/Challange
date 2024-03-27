@@ -1,27 +1,27 @@
 import React from 'react';
 
-const DeleteButton = ({ url, code, fetchData }) => {
+const DeleteButton = ({ url, code, action, onSuccess }) => {
 
   const handleDelete = async () => {
-    try {
+    const response = confirm('Deseja mesmo excluir?');
+    if (response) {
+      try {
         const formData = new FormData();
-        formData.append('action', 'delete')
-        console.log(url);
+        formData.append('action', action)
         formData.append('code', code)
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await response.json();
-      
-      if (response.ok) {
-        alert("Dados excluidos com sucesso");
-        fetchData;
-      } else {
-        console.error('Erro ao excluir:', data.message);
+        const deleteResponse = await fetch(url, {
+          method: 'POST',
+          body: formData
+        });
+        if (deleteResponse.ok) {
+          onSuccess();
+        } else {
+          throw new Error('Erro ao excluir categoria.');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao excluir categoria.');
       }
-    } catch (error) {
-      console.error('Erro ao excluir:', error);
     }
   };
 
